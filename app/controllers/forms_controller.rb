@@ -4,6 +4,9 @@ class FormsController < ApplicationController
   before_action :set_form, only: [:show, :edit, :update, :destroy]
   before_action :signed_in_user
 
+  # Please see the handler for details
+  before_action :form_parameter_name_redirect
+
   # GET /forms
   def index
     @forms = Form.all
@@ -92,5 +95,19 @@ class FormsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def form_params
       params[:form]
+    end
+
+    # As it turns out, the original developers used both workshop_id and form[workshop_id]
+    # when linking to the form creation/editing page.
+    # This controller requires all form related parameters to be stored in the form[]
+    # namespace though. So as a quick fix, we redirect to a URL where the parameters are
+    # properly namespaced.
+    def form_parameter_name_redirect
+      return if params["workshop_id"].nil?
+
+      redirect_to url_for({:form => {
+        :workshop_id => params[:workshop_id],
+        :type => params[:type]
+      }})
     end
 end
