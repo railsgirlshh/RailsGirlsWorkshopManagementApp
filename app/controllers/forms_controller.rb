@@ -23,7 +23,7 @@ class FormsController < ApplicationController
 
   # GET /forms/new
   def new
-    @form = Form.new
+    @form = Form.by_type(form_params["type"])
     @structure = []
     @structure.push "type"=>"text", "caption"=>"Firstname", "name"=>"firstname", "class"=>"immutable_element"
     @structure.push "type"=>"text", "caption"=>"Lastname", "name"=>"lastname", "class"=>"immutable_element"
@@ -38,15 +38,14 @@ class FormsController < ApplicationController
   def create
     workshop_id = form_params[:workshop_id]
     @workshop = Workshop.find(workshop_id)
-    if form_params[:type] == "coach"
-      @form = CoachForm.new(form_params)
-      if @workshop != nil
-        @key = SecureRandom.hex
-        @workshop.update_attributes!(:coach_key => @key)
-      end
-    else
-      @form = ParticipantForm.new(form_params)
+    @form = Form.by_type(form_params["type"])
+    @form.update_attributes(form_params)
+
+    if @form.class.name == 'CoachForm' && @workshop != nil
+      @key = SecureRandom.hex
+      @workshop.update_attributes!(:coach_key => @key)
     end
+
     @form.workshop_id = workshop_id
     if @form.save
       flash[:success] = "Form was successfully created."
