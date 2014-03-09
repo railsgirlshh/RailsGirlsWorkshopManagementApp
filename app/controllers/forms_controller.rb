@@ -4,6 +4,9 @@ class FormsController < ApplicationController
   before_action :set_form, only: [:show, :edit, :update, :destroy]
   before_action :signed_in_user
 
+  # Please see the handler for details
+  before_action :form_parameter_name_redirect
+
   # GET /forms
   def index
     @forms = Form.all
@@ -20,7 +23,7 @@ class FormsController < ApplicationController
 
   # GET /forms/new
   def new
-    @form = Form.new
+    @form = Form.by_type(form_params["type"])
     @structure = []
     @structure.push "type"=>"text", "caption"=>"Firstname", "name"=>"firstname", "class"=>"immutable_element"
     @structure.push "type"=>"text", "caption"=>"Lastname", "name"=>"lastname", "class"=>"immutable_element"
@@ -35,15 +38,14 @@ class FormsController < ApplicationController
   def create
     workshop_id = form_params[:workshop_id]
     @workshop = Workshop.find(workshop_id)
-    if form_params[:type] == "coach"
-      @form = CoachForm.new(form_params)
-      if @workshop != nil
-        @key = SecureRandom.hex
-        @workshop.update_attributes!(:coach_key => @key)
-      end
-    else
-      @form = ParticipantForm.new(form_params)
+    @form = Form.by_type(form_params["type"])
+    @form.update_attributes(form_params)
+
+    if @form.class.name == 'CoachForm' && @workshop != nil
+      @key = SecureRandom.hex
+      @workshop.update_attributes!(:coach_key => @key)
     end
+
     @form.workshop_id = workshop_id
     if @form.save
       flash[:success] = "Form was successfully created."
@@ -92,5 +94,19 @@ class FormsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def form_params
       params[:form]
+    end
+
+    # As it turns out, the original developers used both workshop_id and form[workshop_id]
+    # when linking to the form creation/editing page.
+    # This controller requires all form related parameters to be stored in the form[]
+    # namespace though. So as a quick fix, we redirect to a URL where the parameters are
+    # properly namespaced.
+    def form_parameter_name_redirect
+      return if params["workshop_id"].nil?
+
+      redirect_to url_for({:form => {
+        :workshop_id => params[:workshop_id],
+        :type => params[:type]
+      }})
     end
 end

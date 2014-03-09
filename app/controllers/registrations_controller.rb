@@ -149,8 +149,10 @@ class RegistrationsController < ApplicationController
   def accept_registrations
     params.select{ |key, value| value == "1" }.keys.each do |id|
       r = Registration.find(id)
-      if !r.accepted && r.global_data_transmission
-        r.send_to_global_server
+      if !r.accepted && r.global_data_transmission_accepted?
+        # TODO: Evaluate whether we really want to do this, and if it
+        # is implemented correctly (we don't want to spam their servers, do we?)
+        # r.send_to_global_server
       end
       r.accepted = true
       r.save

@@ -66,9 +66,7 @@ class StructureForm
 		$('#form_structure').val(JSON.stringify(elements))
 
 	add_option: ->
-		# console.log('add option')
 		options_len = @structure_form_tag.find('#current_structure_form .options_set').length
-		# console.log(options_len)
 		new_option = $('<div class="options_set option'+options_len+'" data-option="'+options_len+'">
 		      <label for="option'+options_len+'">Option '+options_len+'</label>
 		      <input class="disabled" type="text" name="option'+options_len+'">
@@ -77,8 +75,7 @@ class StructureForm
 			options = {}
 			@structure_form_tag.find('.options_set input').each ->
 				options[$(@).attr('name')] = $(@).val()
-			# console.log(options)
-			# console.log @structure_form_tag.find('.options')
+
 			@structure_form_tag.find('input[name="options"]').val(JSON.stringify(options))
 			#@structure_form_tag.find('input[name="options"]').val()
 		@structure_form_tag.find('#current_structure_form .add_option').before new_option
@@ -95,7 +92,6 @@ class StructureForm
 		data = @structure_form_tag.serializeArray()
 		structure_element = new StructureElement()
 		structure_element.from_form(data)
-		console.log structure_element
 		@structure_elements.push structure_element
 
 		# render preview and load clean structure form
