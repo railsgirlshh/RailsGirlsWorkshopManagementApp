@@ -47,4 +47,12 @@ class Registration
 
 		puts "Response #{response.code} #{response.message}: #{response.body}"
 	end
+
+	def global_data_transmission_accepted?
+		if respond_to? :global_data_transmission
+			global_data_transmission == "on"
+		else
+			false
+		end
+	end
 end
