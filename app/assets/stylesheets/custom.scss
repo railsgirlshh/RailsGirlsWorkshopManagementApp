@@ -200,7 +200,7 @@ td {
       &:hover {
         background: none;
         text-decoration: underline;
-        background: url(star.png) left no-repeat;
+        background: image-url('star.png') left no-repeat;
       }
     }
   }
